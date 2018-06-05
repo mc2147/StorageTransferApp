@@ -2,7 +2,7 @@ This application allows you to link two Google Drive or Dropbox storage accounts
 
 <b>Setup:</b>
 
-1. From root folder directory, run 'npm install', then 'npm build-client-watch'
+1. From root folder directory, run 'npm install', then 'npm run build-client-watch'
 
 2. Run 'npm start' and head to http://localhost:3000/ to view app
 
