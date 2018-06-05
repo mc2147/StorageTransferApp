@@ -51,8 +51,6 @@ router.post('/auth', function(req, res) {
     else if (accountNum == 2) {
         thisProvider = provider2;      
     }
-    console.log('posting to auth. accountNum: ', accountNum, 'provider: ', thisProvider);
-    console.log('auth req.body: ', req.body);
     // return
     if (thisProvider == 'dropbox') {
         console.log('DROPBOX AUTH');
