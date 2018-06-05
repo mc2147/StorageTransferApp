@@ -1,6 +1,6 @@
 This application allows you to link two Google Drive or Dropbox storage accounts and copy files/folders from one account to another.
 
-Setup:
+<b>Setup:</b>
 
 1. From root folder directory, run 'npm install'
 
