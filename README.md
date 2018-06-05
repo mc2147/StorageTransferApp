@@ -6,7 +6,7 @@ Setup:
 
 2. Run 'npm start' and head to http://localhost:3000/ to view app
 
-3. To clear the storage folder 'sharedFiles', do 'npm run empty'
+3. To clear the storage folder 'sharedFiles', run 'npm run empty' (recursive script that empties the folder)
 
 Instructions:
 
