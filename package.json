@@ -8,7 +8,8 @@
     "build-client": "webpack",
     "build-client-watch": "webpack -w",
     "start": "node app.js",
-    "start-dev": "NODE_ENV='development' npm run build-client-watch & npm run start"
+    "start-dev": "NODE_ENV='development' npm run build-client-watch & npm run start",
+    "empty": "node ./script/empty-directory.js"
   },
   "author": "",
   "license": "ISC",
@@ -44,6 +45,7 @@
     "sinon-chai": "^3.0.0",
     "socket.io": "^2.0.3",
     "stripe": "^5.8.0",
+    "util": "^0.10.4",
     "webpack-atoms": "^7.0.0"
   },
   "devDependencies": {

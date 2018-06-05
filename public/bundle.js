@@ -159,22 +159,29 @@ function (_Component) {
         name: '',
         email: ''
       },
+      // File Lists
       fileList1: [],
-      folderList1: [],
       fileList2: [],
+      // Folder Lists
+      folderList1: [],
       folderList2: [],
+      // Custom file paths
       filePath1: "",
       filePath2: "",
       // Transfer
       sourceAccount: 0,
       sourceID: '',
+      sourcePath: '',
       destinationAccount: 0,
       destinationID: '',
-      customDestinationPath: ''
+      customDestinationPath: '',
+      destinationPath: '',
+      loading: false
     };
     _this.handleChange = _this.handleChange.bind(_assertThisInitialized(_assertThisInitialized(_this)));
     _this.handleSubmit = _this.handleSubmit.bind(_assertThisInitialized(_assertThisInitialized(_this)));
     _this.unlinkAccount = _this.unlinkAccount.bind(_assertThisInitialized(_assertThisInitialized(_this)));
+    _this.transferSubmit = _this.transferSubmit.bind(_assertThisInitialized(_assertThisInitialized(_this)));
     return _this;
   }
 
@@ -184,20 +191,51 @@ function (_Component) {
       var _componentDidMount = _asyncToGenerator(
       /*#__PURE__*/
       regeneratorRuntime.mark(function _callee() {
-        var authStatusResponse, authStatus, _authStatusResponse$d, provider1, provider2, auth1, auth2, accountInfo1, accountInfo2, fileList1, fileList2, folderList1, folderList2;
-
+        var authStatusResponse, authStatus, blankState, provider1, provider2, auth1, auth2, accountInfo1, accountInfo2, fileList1, fileList2, folderList1, folderList2;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _context.next = 2;
+                this.setState({
+                  loading: true
+                });
+                _context.next = 3;
                 return _axios.default.get('/api/auth-status');
 
-              case 2:
+              case 3:
                 authStatusResponse = _context.sent;
                 authStatus = authStatusResponse.data;
-                _authStatusResponse$d = authStatusResponse.data, provider1 = _authStatusResponse$d.provider1, provider2 = _authStatusResponse$d.provider2, auth1 = _authStatusResponse$d.auth1, auth2 = _authStatusResponse$d.auth2, accountInfo1 = _authStatusResponse$d.accountInfo1, accountInfo2 = _authStatusResponse$d.accountInfo2, fileList1 = _authStatusResponse$d.fileList1, fileList2 = _authStatusResponse$d.fileList2, folderList1 = _authStatusResponse$d.folderList1, folderList2 = _authStatusResponse$d.folderList2;
+                blankState = {
+                  provider1: '',
+                  provider2: '',
+                  auth1: false,
+                  auth2: false,
+                  accountInfo1: {},
+                  accountInfo2: {},
+                  fileList1: [],
+                  fileList2: [],
+                  folderList1: [],
+                  folderList2: []
+                };
+                provider1 = blankState.provider1, provider2 = blankState.provider2, auth1 = blankState.auth1, auth2 = blankState.auth2, accountInfo1 = blankState.accountInfo1, accountInfo2 = blankState.accountInfo2, fileList1 = blankState.fileList1, fileList2 = blankState.fileList2, folderList1 = blankState.folderList1, folderList2 = blankState.folderList2; // {provider1, auth1, accountInfo1, fileList1, folderList1} = authStatusResponse.data.storage
+
+                if (authStatusResponse.data.storageAccount1) {
+                  provider1 = authStatusResponse.data.storageAccount1.provider;
+                  auth1 = authStatusResponse.data.storageAccount1.authenticated;
+                  accountInfo1 = authStatusResponse.data.storageAccount1.accountInfo;
+                  fileList1 = authStatusResponse.data.storageAccount1.fileList;
+                  folderList1 = authStatusResponse.data.storageAccount1.folderList;
+                }
+
                 console.log("auth-status: ", authStatusResponse.data);
+
+                if (authStatusResponse.data.storageAccount2) {
+                  provider2 = authStatusResponse.data.storageAccount2.provider;
+                  auth2 = authStatusResponse.data.storageAccount2.authenticated;
+                  accountInfo2 = authStatusResponse.data.storageAccount2.accountInfo;
+                  fileList2 = authStatusResponse.data.storageAccount2.fileList;
+                  folderList2 = authStatusResponse.data.storageAccount2.folderList;
+                }
 
                 if (!fileList1) {
                   fileList1 = [];
@@ -205,6 +243,10 @@ function (_Component) {
 
                 if (!folderList1) {
                   folderList1 = [];
+                }
+
+                if (!accountInfo1) {
+                  accountInfo1 = {};
                 }
 
                 if (!fileList2) {
@@ -215,23 +257,30 @@ function (_Component) {
                   folderList2 = [];
                 }
 
-                _context.next = 12;
+                if (!accountInfo2) {
+                  accountInfo2 = {};
+                }
+
+                _context.next = 18;
                 return this.setState({
                   provider1: provider1,
+                  provider2: provider2,
                   auth1: auth1,
                   auth2: auth2,
                   accountInfo1: accountInfo1,
                   accountInfo2: accountInfo2,
                   fileList1: fileList1,
                   folderList1: folderList1,
-                  fileList2: fileList2
+                  fileList2: fileList2,
+                  folderList2: folderList2,
+                  loading: false
                 });
 
-              case 12:
+              case 18:
                 console.log("this.state: ", this.state);
                 console.log("req.session: ", authStatus);
 
-              case 14:
+              case 20:
               case "end":
                 return _context.stop();
             }
@@ -248,14 +297,53 @@ function (_Component) {
     value: function handleChange(e, _ref) {
       var name = _ref.name,
           value = _ref.value;
-      console.log('name: ', name); // console.log("window: ", window);
+      console.log('name: ', name);
+      this.setState(_defineProperty({}, name, value)); // console.log("window: ", window);
       // customDestinationPath
+      // window.location = 'https://www.google.com';
+    }
+  }, {
+    key: "transferSubmit",
+    value: function transferSubmit() {
+      var _this2 = this;
 
-      this.setState(_defineProperty({}, name, value)); // window.location = 'https://www.google.com';
+      this.setState({
+        loading: true
+      });
+      var _this$state = this.state,
+          sourceID = _this$state.sourceID,
+          destinationID = _this$state.destinationID,
+          sourceAccount = _this$state.sourceAccount,
+          customDestinationPath = _this$state.customDestinationPath;
+      var customPath = false;
+
+      if (customDestinationPath != '') {
+        destinationID = customDestinationPath;
+        customPath = true;
+      }
+
+      console.log('sourceID: ', sourceID, 'destinationID: ', destinationID);
+
+      _axios.default.post('/api/transfer', {
+        sourceID: sourceID,
+        destinationID: destinationID,
+        sourceAccount: sourceAccount,
+        customPath: customPath
+      }).then(function (response) {
+        console.log('transfer response: ', response);
+
+        _this2.setState({
+          loading: false
+        });
+      });
     }
   }, {
     key: "handleSubmit",
     value: function handleSubmit(accountNum) {
+      var _this3 = this;
+
+      this.setState({// loading:true,            
+      });
       var authPost = this.state;
 
       if (accountNum == 1) {
@@ -266,40 +354,47 @@ function (_Component) {
         authPost.accountNum = accountNum;
       }
 
-      var _this$state = this.state,
-          provider1 = _this$state.provider1,
-          provider2 = _this$state.provider2,
-          auth1 = _this$state.auth1,
-          auth2 = _this$state.auth2;
+      var _this$state2 = this.state,
+          provider1 = _this$state2.provider1,
+          provider2 = _this$state2.provider2,
+          auth1 = _this$state2.auth1,
+          auth2 = _this$state2.auth2;
 
       _axios.default.post('/api/auth', authPost).then(function (response) {
         console.log("auth response: ", response);
         var authURL = response.data.authURL;
         window.open(authURL, '_self');
+
+        _this3.setState({
+          loading: false
+        });
       });
     }
   }, {
     key: "unlinkAccount",
     value: function unlinkAccount(accountNum) {
-      var _this2 = this;
+      var _this4 = this;
 
-      if (accountNum == 1) {
-        _axios.default.put('/api/unlink-1').then(function (response) {
-          _this2.setState({
-            auth1: false,
-            provider1: '',
-            accountInfo1: {}
-          }); // console.log("auth-1 response: ", response);
-          // let {authURL} = response.data;
-          // window.open(authURL, '_self');
+      this.setState({
+        loading: true
+      });
 
-        });
-      }
+      _axios.default.put("/api/unlink/".concat(accountNum)).then(function (response) {
+        var unlinked = {};
+        unlinked["auth".concat(accountNum)] = false;
+        unlinked["provider".concat(accountNum)] = '';
+        unlinked["accountInfo".concat(accountNum)] = '';
+        unlinked["fileList".concat(accountNum)] = [];
+        unlinked["folderList".concat(accountNum)] = [];
+        unlinked.loading = false;
+
+        _this4.setState(unlinked);
+      });
     }
   }, {
     key: "render",
     value: function render() {
-      var _this3 = this;
+      var _this5 = this;
 
       var options = [{
         key: 'drpbx',
@@ -320,44 +415,110 @@ function (_Component) {
         value: 2
       }];
       console.log("this.state: ", this.state);
-      var _this$state2 = this.state,
-          provider1 = _this$state2.provider1,
-          provider2 = _this$state2.provider2,
-          auth1 = _this$state2.auth1,
-          auth2 = _this$state2.auth2,
-          accountInfo1 = _this$state2.accountInfo1,
-          accountInfo2 = _this$state2.accountInfo2,
-          fileList1 = _this$state2.fileList1,
-          folderList1 = _this$state2.folderList1,
-          fileList2 = _this$state2.fileList2,
-          folderList2 = _this$state2.folderList2,
-          customDestinationPath = _this$state2.customDestinationPath;
+      var _this$state3 = this.state,
+          provider1 = _this$state3.provider1,
+          provider2 = _this$state3.provider2,
+          auth1 = _this$state3.auth1,
+          auth2 = _this$state3.auth2,
+          accountInfo1 = _this$state3.accountInfo1,
+          accountInfo2 = _this$state3.accountInfo2,
+          fileList1 = _this$state3.fileList1,
+          fileList2 = _this$state3.fileList2,
+          folderList1 = _this$state3.folderList1,
+          folderList2 = _this$state3.folderList2,
+          customDestinationPath = _this$state3.customDestinationPath;
       console.log('fileList1: ', fileList1);
-      console.log('folderList1: ', folderList1); // const listItems = numbers.map((number) =>
+      console.log('folderList1: ', folderList1);
+      var sourceOptions = [];
+      var destinationOptions = [{
+        key: 'root_dir',
+        value: 'root_dir',
+        text: 'NONE (Root Directory)'
+      }];
+      folderList1.forEach(function (folder) {
+        if (_this5.state.sourceAccount == 1) {
+          sourceOptions.push({
+            key: folder.tag,
+            value: folder.tag,
+            text: folder.name + ' [Folder]'
+          });
+        } else if (_this5.state.sourceAccount == 2) {
+          destinationOptions.push({
+            key: folder.tag,
+            value: folder.tag,
+            text: folder.name // + ' [Folder]'                    
+
+          });
+        }
+      });
+      fileList1.forEach(function (file) {
+        if (_this5.state.sourceAccount == 1) {
+          sourceOptions.push({
+            key: file.tag,
+            value: file.tag,
+            text: file.name
+          });
+        } // else if (this.state.sourceAccount == 2) {
+        //     destinationOptions.push({
+        //         key:file.tag,
+        //         value:file.tag,
+        //         text:file.name
+        //     })
+        // }                
+
+      });
+      folderList2.forEach(function (folder) {
+        if (_this5.state.sourceAccount == 2) {
+          sourceOptions.push({
+            key: folder.tag,
+            value: folder.tag,
+            text: folder.name + ' [Folder]'
+          });
+        } else if (_this5.state.sourceAccount == 1) {
+          destinationOptions.push({
+            key: folder.tag,
+            value: folder.tag,
+            text: folder.name // + ' [Folder]'                    
+
+          });
+        }
+      });
+      fileList2.forEach(function (file) {
+        if (_this5.state.sourceAccount == 2) {
+          sourceOptions.push({
+            key: file.tag,
+            value: file.tag,
+            text: file.name
+          });
+        } // else if (this.state.sourceAccount == 1) {
+        //     destinationOptions.push({
+        //         key:file.tag,
+        //         value:file.tag,
+        //         text:file.name
+        //     })
+        // }
+
+      }); // let file
+      // <select name='sourceID' onChange={this.handleChange}>
+      // {folderList1.map((folder) =>
+      //     <option key={folder.tag} value={folder.tag}>{folder.name} [Folder]</option>
+      // )}
+      // const listItems = numbers.map((number) =>
       //     <li>{number}</li>
       // );        
 
-      return _react.default.createElement("div", null, _react.default.createElement("div", {
+      return _react.default.createElement("div", null, _react.default.createElement(_semanticUiReact.Dimmer, {
+        active: this.state.loading,
+        style: {
+          'height': '150vh'
+        }
+      }, _react.default.createElement(_semanticUiReact.Loader, {
+        active: true
+      })), _react.default.createElement("div", {
         className: "ui inverted huge borderless fixed fluid menu"
       }, _react.default.createElement("a", {
         className: "header item"
-      }, "Project name"), _react.default.createElement("div", {
-        className: "right menu"
-      }, _react.default.createElement("div", {
-        className: "item"
-      }, _react.default.createElement("div", {
-        className: "ui small input"
-      }, _react.default.createElement("input", {
-        placeholder: "Search..."
-      }))), _react.default.createElement("a", {
-        className: "item"
-      }, "Dashboard"), _react.default.createElement("a", {
-        className: "item"
-      }, "Settings"), _react.default.createElement("a", {
-        className: "item"
-      }, "Profile"), _react.default.createElement("a", {
-        className: "item"
-      }, "Help"))), _react.default.createElement("div", {
+      }, "CFX Assessment")), _react.default.createElement("div", {
         className: "ui grid"
       }, _react.default.createElement("div", {
         className: "row"
@@ -387,13 +548,13 @@ function (_Component) {
         type: "submit",
         negative: true,
         onClick: function onClick() {
-          return _this3.unlinkAccount(1);
+          return _this5.unlinkAccount(1);
         }
       }, "Unlink Account")) : _react.default.createElement("div", null, _react.default.createElement(_semanticUiReact.Message, {
         negative: true
       }, _react.default.createElement(_semanticUiReact.Message.Header, null, "No Linked Account"), _react.default.createElement("p", null, "You have not linked an account.", _react.default.createElement("br", null), "Please select a storage provider from the list and click 'Link Account' to link your storage account!")), _react.default.createElement(_semanticUiReact.Form, {
         onSubmit: function onSubmit() {
-          return _this3.handleSubmit(1);
+          return _this5.handleSubmit(1);
         }
       }, _react.default.createElement(_semanticUiReact.Form.Select, {
         placeholder: "Select Storage Provider",
@@ -411,16 +572,18 @@ function (_Component) {
         as: "h2"
       }, "Storage Account 2"), auth2 ? _react.default.createElement("div", null, _react.default.createElement(_semanticUiReact.Message, {
         positive: true
-      }, _react.default.createElement(_semanticUiReact.Message.Header, null, "Authenticated!"), _react.default.createElement("p", null, "You are linked to the ", _react.default.createElement("b", null, provider1), " account: ", _react.default.createElement("b", null, accountInfo1.email), _react.default.createElement("br", null), _react.default.createElement("br", null), _react.default.createElement("b", null, "Your Account Information"), ":", _react.default.createElement("br", null), "Provider: ", provider1, _react.default.createElement("br", null), "Name: ", accountInfo1.name, " test", _react.default.createElement("br", null), "Email: ", accountInfo1.email, _react.default.createElement("br", null), _react.default.createElement("br", null))), _react.default.createElement(_semanticUiReact.Button, {
+      }, _react.default.createElement(_semanticUiReact.Message.Header, null, "Authenticated!"), _react.default.createElement("p", null, "You are linked to the ", _react.default.createElement("b", null, provider2), " account: ", _react.default.createElement("b", null, accountInfo2.email), _react.default.createElement("br", null), _react.default.createElement("br", null), _react.default.createElement("b", null, "Your Account Information"), ":", _react.default.createElement("br", null), "Provider: ", provider2, _react.default.createElement("br", null), "Name: ", accountInfo2.name, _react.default.createElement("br", null), "Email: ", accountInfo2.email, _react.default.createElement("br", null), _react.default.createElement("br", null))), _react.default.createElement(_semanticUiReact.Button, {
         type: "submit",
         negative: true,
         onClick: function onClick() {
-          return _this3.unlinkAccount(1);
+          return _this5.unlinkAccount(2);
         }
       }, "Unlink Account")) : _react.default.createElement("div", null, _react.default.createElement(_semanticUiReact.Message, {
         negative: true
       }, _react.default.createElement(_semanticUiReact.Message.Header, null, "Not Authenticated"), _react.default.createElement("p", null, "You have not yet authenticated an account.", _react.default.createElement("br", null), "Please select a storage provider from the list and click 'Authenticate' to link your storage account!")), _react.default.createElement(_semanticUiReact.Form, {
-        onSubmit: this.handleSubmit(2)
+        onSubmit: function onSubmit() {
+          return _this5.handleSubmit(2);
+        }
       }, _react.default.createElement(_semanticUiReact.Form.Select, {
         placeholder: "Select Storage Provider",
         options: options,
@@ -444,7 +607,7 @@ function (_Component) {
         },
         textAlign: "center"
       }, _react.default.createElement(_semanticUiReact.Form, {
-        onSubmit: this.handleSubmit,
+        onSubmit: this.transferSubmit,
         textAlign: "center"
       }, _react.default.createElement(_semanticUiReact.Segment, {
         style: {
@@ -463,37 +626,29 @@ function (_Component) {
         style: {
           marginTop: "5px"
         }
-      }), _react.default.createElement(_semanticUiReact.Form.Field, null, _react.default.createElement("label", null, "Select Source File or Folder"), this.state.sourceAccount == 1 ? _react.default.createElement("select", null, folderList1.map(function (folder) {
-        return _react.default.createElement("option", {
-          key: folder.tag,
-          value: folder.tag
-        }, folder.name, " [Folder]");
-      }), fileList1.map(function (file) {
-        return _react.default.createElement("option", {
-          key: file.tag,
-          value: file.tag
-        }, file.name);
-      })) : null)), _react.default.createElement(_semanticUiReact.Segment.Group, {
+      }), _react.default.createElement(_semanticUiReact.Form.Field, null, _react.default.createElement("label", null, "Select Source File or Folder", this.state.sourceAccount != 0 ? _react.default.createElement("b", null, " (Storage Account ".concat(this.state.sourceAccount, ")")) : null), this.state.sourceAccount != 0 ? _react.default.createElement(_semanticUiReact.Form.Select, {
+        placeholder: "Select Source File or Folder",
+        options: sourceOptions,
+        name: "sourceID",
+        onChange: this.handleChange,
+        style: {
+          marginTop: "5px"
+        }
+      }) : null)), _react.default.createElement(_semanticUiReact.Segment.Group, {
         horizontal: true,
         style: {
           margin: 0
         }
-      }, _react.default.createElement(_semanticUiReact.Segment, null, _react.default.createElement(_semanticUiReact.Form.Field, null, _react.default.createElement("label", null, "Select Destination File or Folder"), _react.default.createElement("select", {
+      }, _react.default.createElement(_semanticUiReact.Segment, null, _react.default.createElement(_semanticUiReact.Form.Field, null, _react.default.createElement("label", null, "Select Destination Folder"), this.state.sourceAccount != 0 ? _react.default.createElement(_semanticUiReact.Form.Select, {
+        placeholder: "Select Source File or Folder",
+        options: destinationOptions,
+        name: "destinationID",
+        onChange: this.handleChange,
+        disabled: customDestinationPath != '',
         style: {
-          marginBottom: '5px'
-        },
-        disabled: customDestinationPath != ''
-      }, folderList1.map(function (folder) {
-        return _react.default.createElement("option", {
-          key: folder.tag,
-          value: folder.tag
-        }, folder.name, " [Folder]");
-      }), fileList1.map(function (file) {
-        return _react.default.createElement("option", {
-          key: file.tag,
-          value: file.tag
-        }, file.name);
-      })), _react.default.createElement("b", null, "OR enter custom directory"), _react.default.createElement(_semanticUiReact.Form.Input, {
+          marginTop: "5px"
+        }
+      }) : null, _react.default.createElement("b", null, "OR enter a custom directory"), _react.default.createElement(_semanticUiReact.Form.Input, {
         placeholder: "Enter custom directory",
         name: "customDestinationPath",
         value: customDestinationPath,
@@ -509,7 +664,8 @@ function (_Component) {
         positive: true,
         style: {
           margin: 'auto'
-        }
+        },
+        onClick: this.transferSubmit
       }, "Transfer File"))))), _react.default.createElement(_semanticUiReact.Grid.Row, {
         columns: 2
       }))))));
