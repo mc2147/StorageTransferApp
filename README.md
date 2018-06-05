@@ -8,7 +8,7 @@ This application allows you to link two Google Drive or Dropbox storage accounts
 
 3. To clear the storage folder 'sharedFiles', run 'npm run empty' (recursive script that empties the folder)
 
-Instructions:
+<b>Instructions:</b>
 
 1. Select your providers and link two accounts under 'Storage Account 1' and 'Storage Account 2'.
 
@@ -20,8 +20,9 @@ Instructions:
 
 5. Click 'Transfer File' to begin transfer
 
+<b>Functionality Status</b>
 
-Full functionality is available for Dropbox-to-Dropbox transfers only at the moment. Dropbox-to-Dropbox folder transfers use a recursive download and upload function that recreates the source Dropbox directory on the local server, then uploads that directory onto the target Dropbox account (uploadDropboxFolder and saveDropboxFolder in '/api/index').
+Full functionality is available for Dropbox-to-Dropbox transfers only for now. Dropbox-to-Dropbox folder transfers use a recursive download and upload function that recreates the source Dropbox directory on the local server, then uploads that directory onto the target Dropbox account (uploadDropboxFolder and saveDropboxFolder in '/api/index').
 
 Dropbox-to-Google Drive transfers work with limited functionality - single files can be copied from Dropbox to Google Drive, but not folders.
 
